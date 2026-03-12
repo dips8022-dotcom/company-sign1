@@ -22,6 +22,8 @@ class BusinessCard extends HTMLElement {
         const profilePic = this.getAttribute('profile-pic');
         const companyLogo = this.getAttribute('company-logo');
 
+        const profilePicHtml = profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필" crossorigin="anonymous"></div>` : '';
+
         const taglineHtml = `
             <div class="tagline">
                 <span class="tagline-main">Leading Technology Provider</span>
@@ -83,7 +85,7 @@ class BusinessCard extends HTMLElement {
 
             <div class="business-card" id="business-card-content">
                 <div class="image-container">
-                    ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
+                    ${profilePicHtml}
                     ${companyLogo ? `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>` : ''}
                 </div>
                 <div class="details">
@@ -134,7 +136,8 @@ class BusinessCard extends HTMLElement {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (businessCardContent) {
              const options = {
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                useCORS: true
              };
 
              html2canvas(businessCardContent, options).then(canvas => {
