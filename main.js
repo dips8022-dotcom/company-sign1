@@ -9,7 +9,6 @@ class SignatureCard extends HTMLElement {
     }
 
     render() {
-        // 1. Clear previous content and get all attributes
         this.shadowRoot.innerHTML = '';
         const name = this.getAttribute('name');
         const title = this.getAttribute('title');
@@ -23,7 +22,6 @@ class SignatureCard extends HTMLElement {
         const profilePic = this.getAttribute('profile-pic');
         const companyLogo = this.getAttribute('company-logo');
 
-        // 2. Build the final HTML string for the details section
         let detailsHtml = '';
         if (name) {
             detailsHtml += `<h3>${name}</h3>`;
@@ -50,19 +48,23 @@ class SignatureCard extends HTMLElement {
             detailsHtml += `<p>${webParts.join(' | ')}</p>`;
         }
         if (companyLogo) {
-            detailsHtml += `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>`;
+            detailsHtml += `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고" crossorigin="anonymous"></div>`;
         }
 
-        // 3. Set the complete innerHTML for the shadow DOM, including styles and structure
         this.shadowRoot.innerHTML = `
             <style>
-                .signature { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: flex-start; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; }
+                /* These styles will be included in the clipboard */
+                .signature { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: flex-start; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: fit-content; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; }
-                .details { font-size: 0.9rem; }
-                .details p, .details h3, .details div { margin: 0; line-height: 1.5; }
-                h3 { color: #000000; font-weight: bold;}
+                .details { font-family: sans-serif; font-size: 9pt; }
+                .details p, .details h3, .details div { margin: 0; line-height: 1.5; color: #000;}
+                .details a { color: #000; text-decoration: none; }
+                .details a:hover { text-decoration: underline; }
+                h3 { color: #000000; font-weight: bold; font-size: 11pt; margin-bottom: 2px;}
                 .company-logo { margin-top: 8px; }
                 .company-logo img { max-height: 60px; width: auto; }
+
+                /* These styles are for the buttons and won't be copied */
                 .actions { margin-top: 15px; }
                 button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
                 .copy-text { background-color: #0078D4; color: white; }
@@ -71,7 +73,7 @@ class SignatureCard extends HTMLElement {
             </style>
 
             <div class="signature" id="signature-content">
-                ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
+                ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필" crossorigin="anonymous"></div>` : ''}
                 <div class="details">
                     ${detailsHtml}
                 </div>
@@ -84,7 +86,6 @@ class SignatureCard extends HTMLElement {
             </div>
         `;
 
-        // 4. Add event listeners after the DOM has been created
         this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.copyAsImage());
         this.shadowRoot.querySelector('.delete').addEventListener('click', () => this.remove());
@@ -92,13 +93,26 @@ class SignatureCard extends HTMLElement {
 
     copyAsText() {
         const signatureContent = this.shadowRoot.querySelector('#signature-content');
+        // Get the style content from the style tag
+        const styleContent = this.shadowRoot.querySelector('style').innerHTML;
+
         if (signatureContent) {
+            // Combine the style and the signature's outer HTML
+            const htmlToCopy = `
+                <meta charset="UTF-8">
+                <style>
+                    ${styleContent}
+                </style>
+                ${signatureContent.outerHTML}
+            `;
+            
             navigator.clipboard.write([new ClipboardItem({
-                'text/html': new Blob([signatureContent.innerHTML], { type: 'text/html' })
+                'text/html': new Blob([htmlToCopy], { type: 'text/html' })
             })]).then(() => {
-                alert('서명이 텍스트로 복사되었습니다!');
+                alert('서명이 서식과 함께 복사되었습니다!');
             }).catch(err => {
-                console.error('텍스트 복사 실패: ', err);
+                console.error('HTML 서식 복사 실패: ', err);
+                alert('오류: 서식 복사에 실패했습니다.');
             });
         }
     }
@@ -106,7 +120,13 @@ class SignatureCard extends HTMLElement {
     copyAsImage() {
         const signatureContent = this.shadowRoot.querySelector('#signature-content');
         if (signatureContent) {
-             html2canvas(signatureContent).then(canvas => {
+             const options = {
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                allowTaint: true
+             };
+
+             html2canvas(signatureContent, options).then(canvas => {
                 canvas.toBlob(blob => {
                     if(blob) {
                         navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
@@ -129,8 +149,6 @@ const preview = document.getElementById('signature-preview');
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const newSignature = document.createElement('signature-card');
-    
-    // Use FormData to easily get all values
     const formData = new FormData(form);
     for (const [name, value] of formData.entries()) {
         newSignature.setAttribute(name, value);
