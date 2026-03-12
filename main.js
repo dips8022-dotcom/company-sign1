@@ -48,7 +48,7 @@ class SignatureCard extends HTMLElement {
             detailsHtml += `<p>${webParts.join(' | ')}</p>`;
         }
         if (companyLogo) {
-            detailsHtml += `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고" crossorigin="anonymous"></div>`;
+            detailsHtml += `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>`;
         }
 
         this.shadowRoot.innerHTML = `
@@ -62,7 +62,7 @@ class SignatureCard extends HTMLElement {
                 .details a:hover { text-decoration: underline; }
                 h3 { color: #000000; font-weight: bold; font-size: 11pt; margin-bottom: 2px;}
                 .company-logo { margin-top: 8px; }
-                .company-logo img { max-height: 60px; width: auto; }
+                .company-logo img { max-height: 23px; width: auto; }
 
                 /* These styles are for the buttons and won't be copied */
                 .actions { margin-top: 15px; }
@@ -73,7 +73,7 @@ class SignatureCard extends HTMLElement {
             </style>
 
             <div class="signature" id="signature-content">
-                ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필" crossorigin="anonymous"></div>` : ''}
+                ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
                 <div class="details">
                     ${detailsHtml}
                 </div>
@@ -93,11 +93,9 @@ class SignatureCard extends HTMLElement {
 
     copyAsText() {
         const signatureContent = this.shadowRoot.querySelector('#signature-content');
-        // Get the style content from the style tag
         const styleContent = this.shadowRoot.querySelector('style').innerHTML;
 
         if (signatureContent) {
-            // Combine the style and the signature's outer HTML
             const htmlToCopy = `
                 <meta charset="UTF-8">
                 <style>
@@ -121,9 +119,7 @@ class SignatureCard extends HTMLElement {
         const signatureContent = this.shadowRoot.querySelector('#signature-content');
         if (signatureContent) {
              const options = {
-                backgroundColor: '#ffffff',
-                useCORS: true,
-                allowTaint: true
+                backgroundColor: '#ffffff'
              };
 
              html2canvas(signatureContent, options).then(canvas => {
@@ -153,6 +149,8 @@ form.addEventListener('submit', (e) => {
     for (const [name, value] of formData.entries()) {
         newSignature.setAttribute(name, value);
     }
+    // Always use the local company logo
+    newSignature.setAttribute('company-logo', './company-logo.svg');
 
     preview.innerHTML = '';
     preview.appendChild(newSignature);
