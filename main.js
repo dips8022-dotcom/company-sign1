@@ -8,6 +8,14 @@ class BusinessCard extends HTMLElement {
         this.render();
     }
 
+    static get observedAttributes() {
+        return ['name', 'title', 'department', 'company', 'address', 'phone', 'personal-phone', 'email', 'website', 'profile-pic', 'company-logo'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        this.render();
+    }
+
     render() {
         this.shadowRoot.innerHTML = '';
         const name = this.getAttribute('name');
@@ -59,10 +67,9 @@ class BusinessCard extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                /* These styles will be included in the clipboard */
                 .business-card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: 360px; }
                 .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
-                .profile-pic img { border-radius: 50%; width: 80px; height: 80px; }
+                .profile-pic img { border-radius: 50%; width: 80px; height: 80px; object-fit: cover; }
                 .company-logo img { max-height: 23px; width: auto; }
                 .details { font-family: sans-serif; font-size: 9pt; flex-grow: 1; }
                 .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000;}
@@ -75,7 +82,6 @@ class BusinessCard extends HTMLElement {
                 .tagline-main { font-weight: bold; font-size: 9pt; color: red; }
                 .tagline-sub { font-size: 8pt; color: black; margin-top: 0px; }
 
-                /* These styles are for the buttons and won't be copied */
                 .actions { margin-top: 15px; }
                 button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
                 .copy-text { background-color: #0078D4; color: white; }
@@ -159,18 +165,47 @@ customElements.define('business-card', BusinessCard);
 
 const form = document.getElementById('business-card-form');
 const preview = document.getElementById('business-card-preview');
+const businessCard = preview.querySelector('business-card');
+
+const updateCard = () => {
+    const formData = new FormData(form);
+    const fileInput = document.getElementById('profile-pic');
+    const file = fileInput.files[0];
+
+    for(const [name, value] of formData.entries()) {
+        if (name !== 'profile-pic') {
+            businessCard.setAttribute(name, value);
+        }
+    }
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            businessCard.setAttribute('profile-pic', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // If no file is selected, but there was a text input for it previously
+        const profilePicUrl = formData.get('profile-pic'); // This will be a string
+        if (!profilePicUrl) {
+            businessCard.removeAttribute('profile-pic');
+        }
+    }
+}
+
+form.addEventListener('input', updateCard);
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const newBusinessCard = document.createElement('business-card');
-    const formData = new FormData(form);
-    for (const [name, value] of formData.entries()) {
-        newBusinessCard.setAttribute(name, value);
+    // Create a new card in the preview to finalize it.
+    const newCard = document.createElement('business-card');
+    const oldCard = preview.querySelector('business-card');
+    
+    // Copy attributes from the live-preview card to the new card
+    for (const attr of oldCard.attributes) {
+        newCard.setAttribute(attr.name, attr.value);
     }
-    // Always use the local company logo
-    newBusinessCard.setAttribute('company-logo', './company-logo.svg');
 
-    preview.innerHTML = '';
-    preview.appendChild(newBusinessCard);
-    form.reset();
+    preview.innerHTML = ''; 
+    preview.appendChild(newCard);
 });
