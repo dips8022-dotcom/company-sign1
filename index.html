@@ -1,34 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Signature Generator</title>
+    <title>이메일 서명 생성기</title>
     <link rel="stylesheet" href="style.css">
+    <!-- No Caching Headers -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 </head>
 <body>
     <div class="container">
         <div class="form-container">
-            <h1>Create Your Signature</h1>
+            <h1>서명 만들기</h1>
             <form id="signature-form">
-                <input type="text" id="name" placeholder="Full Name" required>
-                <input type="text" id="title" placeholder="Job Title" required>
-                <input type="text" id="department" placeholder="Department">
-                <input type="text" id="company" placeholder="Company Name" required>
-                <input type="tel" id="phone" placeholder="Phone Number">
-                <input type="email" id="email" placeholder="Email Address">
-                <input type="url" id="website" placeholder="Website">
-                <input type="url" id="profile-pic" placeholder="Profile Picture URL">
-                <input type="url" id="company-logo" placeholder="Company Logo URL">
-                <button type="submit">Create Signature</button>
+                <input type="text" id="name" name="name" placeholder="이름" required>
+                <input type="text" id="title" name="title" placeholder="직위" required>
+                <input type="text" id="department" name="department" placeholder="부서">
+                <input type="text" id="company" name="company" placeholder="회사명" required>
+                <input type="text" id="address" name="address" placeholder="주소">
+                <input type="tel" id="phone" name="phone" placeholder="전화번호">
+                <input type="tel" id="personal-phone" name="personal-phone" placeholder="개인 핸드폰 번호">
+                <input type="email" id="email" name="email" placeholder="이메일 주소">
+                <input type="url" id="website" name="website" placeholder="웹사이트">
+                <input type="url" id="profile-pic" name="profile-pic" placeholder="프로필 사진 URL">
+                <input type="url" id="company-logo" name="company-logo" placeholder="회사 로고 URL">
+                <button type="submit">서명 생성</button>
             </form>
         </div>
         <div class="preview-container">
-            <h2>Signature Preview</h2>
+            <h2>서명 미리보기</h2>
             <div id="signature-preview"></div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="main.js"></script>
+    <script id="main-script" src="main.js"></script>
+    <script>
+        // Force reload the script to bypass cache
+        const script = document.getElementById('main-script');
+        script.src = `main.js?v=${new Date().getTime()}`;
+    </script>
 </body>
 </html>
