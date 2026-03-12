@@ -82,7 +82,7 @@ class BusinessCard extends HTMLElement {
                 }
                 .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; object-fit: cover; }
-                .company-logo img { max-height: 23px; width: auto; }
+                .company-logo img { max-height: 23px; width: auto; max-width: 100%; }
                 .details { font-family: sans-serif; font-size: 9pt; flex-grow: 1; }
                 .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000;}
                 .details a { color: #000; text-decoration: none; }
