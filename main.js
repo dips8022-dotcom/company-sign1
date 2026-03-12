@@ -1,4 +1,4 @@
-class SignatureCard extends HTMLElement {
+class BusinessCard extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
@@ -58,7 +58,7 @@ class SignatureCard extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 /* These styles will be included in the clipboard */
-                .signature { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: 360px; }
+                .business-card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: 360px; }
                 .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; }
                 .company-logo img { max-height: 23px; width: auto; }
@@ -81,7 +81,7 @@ class SignatureCard extends HTMLElement {
                 .delete { background-color: #dc3545; color: white; }
             </style>
 
-            <div class="signature" id="signature-content">
+            <div class="business-card" id="business-card-content">
                 <div class="image-container">
                     ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
                     ${companyLogo ? `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>` : ''}
@@ -107,41 +107,41 @@ class SignatureCard extends HTMLElement {
     }
 
     copyAsText() {
-        const signatureContent = this.shadowRoot.querySelector('#signature-content');
+        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         const styleContent = this.shadowRoot.querySelector('style').innerHTML;
 
-        if (signatureContent) {
+        if (businessCardContent) {
             const htmlToCopy = `
                 <meta charset="UTF-8">
                 <style>
                     ${styleContent}
                 </style>
-                ${signatureContent.outerHTML}
+                ${businessCardContent.outerHTML}
             `;
             
             navigator.clipboard.write([new ClipboardItem({
                 'text/html': new Blob([htmlToCopy], { type: 'text/html' })
             })]).then(() => {
-                alert('서명이 서식과 함께 복사되었습니다!');
+                alert('명함이 서식과 함께 복사되었습니다!');
             }).catch(err => {
-                console.error('HTML 서식 복사 실패: ', err);
-                alert('오류: 서식 복사에 실패했습니다.');
+                console.error('HTML 명함 복사 실패: ', err);
+                alert('오류: 명함 복사에 실패했습니다.');
             });
         }
     }
 
     copyAsImage() {
-        const signatureContent = this.shadowRoot.querySelector('#signature-content');
-        if (signatureContent) {
+        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
+        if (businessCardContent) {
              const options = {
                 backgroundColor: '#ffffff'
              };
 
-             html2canvas(signatureContent, options).then(canvas => {
+             html2canvas(businessCardContent, options).then(canvas => {
                 canvas.toBlob(blob => {
                     if(blob) {
                         navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
-                            alert('서명이 이미지로 복사되었습니다!');
+                            alert('명함이 이미지로 복사되었습니다!');
                         }).catch(err => {
                             console.error('이미지 복사 실패: ', err);
                         });
@@ -152,22 +152,22 @@ class SignatureCard extends HTMLElement {
     }
 }
 
-customElements.define('signature-card', SignatureCard);
+customElements.define('business-card', BusinessCard);
 
-const form = document.getElementById('signature-form');
-const preview = document.getElementById('signature-preview');
+const form = document.getElementById('business-card-form');
+const preview = document.getElementById('business-card-preview');
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const newSignature = document.createElement('signature-card');
+    const newBusinessCard = document.createElement('business-card');
     const formData = new FormData(form);
     for (const [name, value] of formData.entries()) {
-        newSignature.setAttribute(name, value);
+        newBusinessCard.setAttribute(name, value);
     }
     // Always use the local company logo
-    newSignature.setAttribute('company-logo', './company-logo.svg');
+    newBusinessCard.setAttribute('company-logo', './company-logo.svg');
 
     preview.innerHTML = '';
-    preview.appendChild(newSignature);
+    preview.appendChild(newBusinessCard);
     form.reset();
 });

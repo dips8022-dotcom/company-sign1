@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이메일 서명 생성기</title>
+    <title>명함 생성기</title>
     <link rel="stylesheet" href="style.css">
     <!-- No Caching Headers -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -13,8 +13,8 @@
 <body>
     <div class="container">
         <div class="form-container">
-            <h1>서명 만들기</h1>
-            <form id="signature-form">
+            <h1>명함 만들기</h1>
+            <form id="business-card-form">
                 <input type="text" id="name" name="name" placeholder="이름" required>
                 <input type="text" id="title" name="title" placeholder="직위" required>
                 <input type="text" id="department" name="department" placeholder="부서">
@@ -25,34 +25,29 @@
                 <input type="email" id="email" name="email" placeholder="이메일 주소">
                 <input type="url" id="website" name="website" placeholder="웹사이트">
                 <input type="url" id="profile-pic" name="profile-pic" placeholder="프로필 사진 URL">
-                <button type="submit">서명 생성</button>
+                <button type="submit">명함 생성</button>
             </form>
         </div>
         <div class="preview-container">
-            <h2>서명 미리보기</h2>
-            <div id="signature-preview">
-                <signature-card
+            <h2>명함 미리보기</h2>
+            <div id="business-card-preview">
+                <business-card
                     name="홍길동"
                     title="개발자"
                     department="개발팀"
                     company="(주)멋진회사"
                     address="서울시 강남구 테헤란로 123"
                     phone="02-1234-5678"
-                    personal-phone="010-1234-5678"
+                    personal-phone="010-9876-5432"
                     email="gildong.hong@example.com"
-                    website="example.com"
-                    profile-pic="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                    company-logo="./company-logo.svg"
-                ></signature-card>
+                    website="www.example.com"
+                    profile-pic="./profile_placeholder.png"
+                    company-logo="./company-logo.svg">
+                </business-card>
             </div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script id="main-script" src="main.js"></script>
-    <script>
-        // Force reload the script to bypass cache
-        const script = document.getElementById('main-script');
-        script.src = `main.js?v=${new Date().getTime()}`;
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>

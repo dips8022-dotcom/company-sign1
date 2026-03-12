@@ -1,69 +1,79 @@
 body {
     font-family: sans-serif;
-    background-color: #f4f7f6;
+    background-color: #f4f4f4;
     color: #333;
     margin: 0;
+    padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
 }
 
 .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    width: 90%;
+    display: flex;
+    gap: 20px;
+    width: 80%;
     max-width: 1200px;
+}
+
+.form-container, .preview-container {
     background: #fff;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 50%;
 }
 
 .form-container h1, .preview-container h2 {
-    color: #005A9C;
     text-align: center;
+    color: #333;
+    margin-top: 0;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
-input {
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="url"] {
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
+    border-radius: 4px;
 }
 
-button {
-    padding: 12px;
+button[type="submit"] {
+    padding: 10px 15px;
     background-color: #0078D4;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
 }
 
-button:hover {
-    background-color: #005A9C;
+button[type="submit"]:hover {
+    background-color: #005a9e;
 }
 
-.preview-container {
-    border-left: 1px solid #ddd;
-    padding-left: 40px;
-}
-
-#signature-preview {
+#business-card-preview {
     margin-top: 20px;
+    display: flex;
+    justify-content: center;
 }
 
-signature-card {
-    display: block;
-    margin-bottom: 20px;
+.business-card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: #fff;
+    width: 360px;
 }
