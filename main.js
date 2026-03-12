@@ -22,6 +22,13 @@ class SignatureCard extends HTMLElement {
         const profilePic = this.getAttribute('profile-pic');
         const companyLogo = this.getAttribute('company-logo');
 
+        const taglineHtml = `
+            <div class="tagline">
+                <span class="tagline-main">Leading Technology Provider</span>
+                <span class="tagline-sub">Since 1990</span>
+            </div>
+        `;
+
         let detailsHtml = '';
         if (name) {
             detailsHtml += `<h3>${name}</h3>`;
@@ -47,22 +54,24 @@ class SignatureCard extends HTMLElement {
         if (webParts.length > 0) {
             detailsHtml += `<p>${webParts.join(' | ')}</p>`;
         }
-        if (companyLogo) {
-            detailsHtml += `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>`;
-        }
 
         this.shadowRoot.innerHTML = `
             <style>
                 /* These styles will be included in the clipboard */
-                .signature { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: flex-start; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: fit-content; }
+                .signature { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: 360px; }
+                .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; }
-                .details { font-family: sans-serif; font-size: 9pt; }
-                .details p, .details h3, .details div { margin: 0; line-height: 1.5; color: #000;}
+                .company-logo img { max-height: 23px; width: auto; }
+                .details { font-family: sans-serif; font-size: 9pt; flex-grow: 1; }
+                .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000;}
                 .details a { color: #000; text-decoration: none; }
                 .details a:hover { text-decoration: underline; }
-                h3 { color: #000000; font-weight: bold; font-size: 11pt; margin-bottom: 2px;}
-                .company-logo { margin-top: 8px; }
-                .company-logo img { max-height: 23px; width: auto; }
+                h3 { color: #000000; font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
+
+                .tagline { text-align: right; margin-bottom: 5px; margin-top: -8px; }
+                .tagline-main, .tagline-sub { display: block; line-height: 1; }
+                .tagline-main { font-weight: bold; font-size: 9pt; color: red; }
+                .tagline-sub { font-size: 8pt; color: black; margin-top: 0px; }
 
                 /* These styles are for the buttons and won't be copied */
                 .actions { margin-top: 15px; }
@@ -73,9 +82,15 @@ class SignatureCard extends HTMLElement {
             </style>
 
             <div class="signature" id="signature-content">
-                ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
+                <div class="image-container">
+                    ${profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필"></div>` : ''}
+                    ${companyLogo ? `<div class="company-logo"><img src="${companyLogo}" alt="회사 로고"></div>` : ''}
+                </div>
                 <div class="details">
-                    ${detailsHtml}
+                    ${taglineHtml}
+                    <div class="info-block">
+                        ${detailsHtml}
+                    </div>
                 </div>
             </div>
 
