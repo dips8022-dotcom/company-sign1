@@ -40,7 +40,8 @@ form {
 input[type="text"],
 input[type="tel"],
 input[type="email"],
-input[type="url"] {
+input[type="url"],
+input[type="file"] {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -54,6 +55,7 @@ button[type="submit"] {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    margin-top: 10px; 
 }
 
 button[type="submit"]:hover {
@@ -66,14 +68,16 @@ button[type="submit"]:hover {
     justify-content: center;
 }
 
-.business-card {
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 10px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background: #fff;
-    width: 360px;
+
+/* Media Query for Responsive Layout */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        width: 95%;
+    }
+
+    .form-container, .preview-container {
+        width: 100%;
+        box-sizing: border-box; /* padding and border included in the width */
+    }
 }

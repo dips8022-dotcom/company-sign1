@@ -67,7 +67,19 @@ class BusinessCard extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                .business-card { border: 1px solid #ccc; padding: 20px; border-radius: 10px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #fff; width: 360px; }
+                .business-card {
+                    border: 1px solid #ccc;
+                    padding: 20px;
+                    border-radius: 10px;
+                    display: flex;
+                    gap: 20px;
+                    align-items: center;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    background: #fff;
+                    width: 100%;
+                    max-width: 380px;
+                    box-sizing: border-box;
+                }
                 .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; object-fit: cover; }
                 .company-logo img { max-height: 23px; width: auto; }
@@ -82,11 +94,28 @@ class BusinessCard extends HTMLElement {
                 .tagline-main { font-weight: bold; font-size: 9pt; color: red; }
                 .tagline-sub { font-size: 8pt; color: black; margin-top: 0px; }
 
-                .actions { margin-top: 15px; }
-                button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+                .actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
+                button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
                 .copy-text { background-color: #0078D4; color: white; }
                 .copy-image { background-color: #28a745; color: white; }
+                .download-jpg { background-color: #ffc107; color: black; }
                 .delete { background-color: #dc3545; color: white; }
+
+                @media (max-width: 400px) {
+                    .business-card {
+                        flex-direction: column;
+                        text-align: center;
+                    }
+                    .image-container {
+                        margin-bottom: 15px;
+                    }
+                    .details {
+                        text-align: center;
+                    }
+                    .tagline {
+                        text-align: center;
+                    }
+                }
             </style>
 
             <div class="business-card" id="business-card-content">
@@ -105,12 +134,14 @@ class BusinessCard extends HTMLElement {
             <div class="actions">
                 <button class="copy-text">텍스트로 복사</button>
                 <button class="copy-image">이미지로 복사</button>
+                <button class="download-jpg">JPG로 다운로드</button>
                 <button class="delete">삭제</button>
             </div>
         `;
 
         this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.copyAsImage());
+        this.shadowRoot.querySelector('.download-jpg').addEventListener('click', () => this.downloadAsJPG());
         this.shadowRoot.querySelector('.delete').addEventListener('click', () => this.remove());
     }
 
@@ -159,6 +190,25 @@ class BusinessCard extends HTMLElement {
             });
         }
     }
+    
+    downloadAsJPG() {
+        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
+        if (businessCardContent) {
+             const options = {
+                backgroundColor: '#ffffff',
+                useCORS: true
+             };
+
+             html2canvas(businessCardContent, options).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.download = 'business-card.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+    }
 }
 
 customElements.define('business-card', BusinessCard);
@@ -185,8 +235,7 @@ const updateCard = () => {
         };
         reader.readAsDataURL(file);
     } else {
-        // If no file is selected, but there was a text input for it previously
-        const profilePicUrl = formData.get('profile-pic'); // This will be a string
+        const profilePicUrl = formData.get('profile-pic');
         if (!profilePicUrl) {
             businessCard.removeAttribute('profile-pic');
         }
@@ -197,11 +246,9 @@ form.addEventListener('input', updateCard);
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    // Create a new card in the preview to finalize it.
     const newCard = document.createElement('business-card');
     const oldCard = preview.querySelector('business-card');
     
-    // Copy attributes from the live-preview card to the new card
     for (const attr of oldCard.attributes) {
         newCard.setAttribute(attr.name, attr.value);
     }
