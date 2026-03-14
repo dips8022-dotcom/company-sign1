@@ -80,16 +80,16 @@ class BusinessCard extends HTMLElement {
                     max-width: 380px;
                     box-sizing: border-box;
                 }
-                .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; }
+                .image-container { display: flex; flex-direction: column; gap: 5px; align-items: center; flex-shrink: 0; }
                 .profile-pic img { border-radius: 50%; width: 80px; height: 80px; object-fit: cover; }
                 .company-logo img { max-height: 23px; width: auto; max-width: 100%; }
-                .details { font-family: sans-serif; font-size: 9pt; flex-grow: 1; }
-                .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000;}
+                .details { font-family: sans-serif; font-size: 9pt; flex-grow: 1; overflow: hidden; }
+                .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000; word-break: break-all;}
                 .details a { color: #000; text-decoration: none; }
                 .details a:hover { text-decoration: underline; }
                 h3 { color: #000000; font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
 
-                .tagline { text-align: right; margin-bottom: 5px; margin-top: -8px; }
+                .tagline { text-align: right; margin-bottom: 5px; margin-top: 8px; white-space: nowrap; }
                 .tagline-main, .tagline-sub { display: block; line-height: 1; }
                 .tagline-main { font-weight: bold; font-size: 9pt; color: red; }
                 .tagline-sub { font-size: 8pt; color: black; margin-top: 0px; }
@@ -174,7 +174,10 @@ class BusinessCard extends HTMLElement {
         if (businessCardContent) {
              const options = {
                 backgroundColor: '#ffffff',
-                useCORS: true
+                useCORS: true,
+                width: businessCardContent.offsetWidth,
+                height: businessCardContent.offsetHeight,
+                scale: 2
              };
 
              html2canvas(businessCardContent, options).then(canvas => {
@@ -194,10 +197,13 @@ class BusinessCard extends HTMLElement {
     downloadAsJPG() {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (businessCardContent) {
-             const options = {
+            const options = {
                 backgroundColor: '#ffffff',
-                useCORS: true
-             };
+                useCORS: true,
+                width: businessCardContent.offsetWidth,
+                height: businessCardContent.offsetHeight,
+                scale: 2
+            };
 
              html2canvas(businessCardContent, options).then(canvas => {
                 const link = document.createElement('a');
