@@ -9,7 +9,7 @@ class BusinessCard extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['name', 'title', 'department', 'company', 'address', 'phone', 'personal-phone', 'email', 'website', 'profile-pic', 'company-logo'];
+        return ['name', 'name-color', 'title', 'department', 'company', 'address', 'phone', 'personal-phone', 'email', 'website', 'profile-pic', 'company-logo', 'tagline-main', 'tagline-main-color', 'tagline-sub', 'tagline-sub-color', 'background-color'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -19,6 +19,7 @@ class BusinessCard extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = '';
         const name = this.getAttribute('name');
+        const nameColor = this.getAttribute('name-color');
         const title = this.getAttribute('title');
         const department = this.getAttribute('department');
         const company = this.getAttribute('company');
@@ -29,19 +30,24 @@ class BusinessCard extends HTMLElement {
         const website = this.getAttribute('website');
         const profilePic = this.getAttribute('profile-pic');
         const companyLogo = this.getAttribute('company-logo');
+        const taglineMain = this.getAttribute('tagline-main');
+        const taglineMainColor = this.getAttribute('tagline-main-color');
+        const taglineSub = this.getAttribute('tagline-sub');
+        const taglineSubColor = this.getAttribute('tagline-sub-color');
+        const backgroundColor = this.getAttribute('background-color');
 
         const profilePicHtml = profilePic ? `<div class="profile-pic"><img src="${profilePic}" alt="프로필" crossorigin="anonymous"></div>` : '';
 
         const taglineHtml = `
             <div class="tagline">
-                <span class="tagline-main">Leading Technology Provider</span>
-                <span class="tagline-sub">Since 1990</span>
+                <span class="tagline-main" style="color: ${taglineMainColor || '#ff0000'}">${taglineMain || ''}</span>
+                <span class="tagline-sub" style="color: ${taglineSubColor || '#000000'}">${taglineSub || ''}</span>
             </div>
         `;
 
         let detailsHtml = '';
         if (name) {
-            detailsHtml += `<h3>${name}</h3>`;
+            detailsHtml += `<h3 style="color: ${nameColor || '#000000'}">${name}</h3>`;
         }
         if (title || department) {
             detailsHtml += `<p>${title || ''}${title && department ? ' | ' : ''}${department || ''}</p>`;
@@ -75,7 +81,7 @@ class BusinessCard extends HTMLElement {
                     gap: 20px;
                     align-items: center;
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    background: #fff;
+                    background: ${backgroundColor || '#ffffff'};
                     width: 100%;
                     max-width: 380px;
                     box-sizing: border-box;
@@ -87,12 +93,12 @@ class BusinessCard extends HTMLElement {
                 .info-block p, .details h3, .info-block div { margin: 0; line-height: 1.5; color: #000; word-break: break-all;}
                 .details a { color: #000; text-decoration: none; }
                 .details a:hover { text-decoration: underline; }
-                h3 { color: #000000; font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
+                h3 { font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
 
                 .tagline { text-align: right; margin-bottom: 5px; margin-top: 8px; white-space: nowrap; }
                 .tagline-main, .tagline-sub { display: block; line-height: 1; }
-                .tagline-main { font-weight: bold; font-size: 9pt; color: red; }
-                .tagline-sub { font-size: 8pt; color: black; margin-top: 0px; }
+                .tagline-main { font-weight: bold; font-size: 9pt; }
+                .tagline-sub { font-size: 8pt; margin-top: 0px; }
 
                 .actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
                 button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
@@ -171,7 +177,7 @@ class BusinessCard extends HTMLElement {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (businessCardContent) {
              const options = {
-                backgroundColor: '#ffffff',
+                backgroundColor: this.getAttribute('background-color') || '#ffffff',
                 useCORS: true,
                 width: businessCardContent.offsetWidth,
                 height: businessCardContent.offsetHeight,
@@ -196,7 +202,7 @@ class BusinessCard extends HTMLElement {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (businessCardContent) {
             const options = {
-                backgroundColor: '#ffffff',
+                backgroundColor: this.getAttribute('background-color') || '#ffffff',
                 useCORS: true,
                 width: businessCardContent.offsetWidth,
                 height: businessCardContent.offsetHeight,
@@ -263,4 +269,18 @@ form.addEventListener('submit', (e) => {
 
     preview.innerHTML = ''; 
     preview.appendChild(newCard);
+});
+
+document.querySelectorAll('.color-palette').forEach(palette => {
+    palette.addEventListener('click', (e) => {
+        if (e.target.classList.contains('color-swatch')) {
+            const color = e.target.dataset.color;
+            const targetInputId = e.currentTarget.dataset.for;
+            const targetInput = document.getElementById(targetInputId);
+            if (targetInput) {
+                targetInput.value = color;
+                updateCard();
+            }
+        }
+    });
 });

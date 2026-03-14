@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>명함 생성기</title>
-    <link rel="stylesheet" href="style.css?v=3.0">
+    <link rel="stylesheet" href="style.css?v=3.4">
     <!-- No Caching Headers -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -16,6 +16,15 @@
             <h1>명함 만들기</h1>
             <form id="business-card-form">
                 <input type="text" id="name" name="name" placeholder="이름" required>
+                <label for="name-color">이름 색상:</label>
+                <input type="color" id="name-color" name="name-color" value="#000000">
+                <div class="color-palette" data-for="name-color">
+                    <div class="color-swatch" data-color="#000000" style="background-color: #000000;"></div>
+                    <div class="color-swatch" data-color="#333333" style="background-color: #333333;"></div>
+                    <div class="color-swatch" data-color="#FFFFFF" style="background-color: #FFFFFF;"></div>
+                    <div class="color-swatch" data-color="#4A90E2" style="background-color: #4A90E2;"></div>
+                </div>
+
                 <input type="text" id="title" name="title" placeholder="직위" required>
                 <input type="text" id="department" name="department" placeholder="부서">
                 <input type="text" id="company" name="company" placeholder="회사명" required>
@@ -24,10 +33,41 @@
                 <input type="text" id="personal-phone" name="personal-phone" placeholder="개인 핸드폰 번호">
                 <input type="email" id="email" name="email" placeholder="이메일 주소">
                 <input type="text" id="website" name="website" placeholder="웹사이트">
+
+                <input type="text" id="tagline-main" name="tagline-main" placeholder="메인 슬로건">
+                <label for="tagline-main-color">메인 슬로건 색상:</label>
+                <input type="color" id="tagline-main-color" name="tagline-main-color" value="#ff0000">
+                <div class="color-palette" data-for="tagline-main-color">
+                    <div class="color-swatch" data-color="#FF0000" style="background-color: #FF0000;"></div>
+                    <div class="color-swatch" data-color="#D0021B" style="background-color: #D0021B;"></div>
+                    <div class="color-swatch" data-color="#F5A623" style="background-color: #F5A623;"></div>
+                    <div class="color-swatch" data-color="#4A90E2" style="background-color: #4A90E2;"></div>
+                </div>
+
+                <input type="text" id="tagline-sub" name="tagline-sub" placeholder="서브 슬로건">
+                <label for="tagline-sub-color">서브 슬로건 색상:</label>
+                <input type="color" id="tagline-sub-color" name="tagline-sub-color" value="#000000">
+                <div class="color-palette" data-for="tagline-sub-color">
+                    <div class="color-swatch" data-color="#000000" style="background-color: #000000;"></div>
+                    <div class="color-swatch" data-color="#4A4A4A" style="background-color: #4A4A4A;"></div>
+                    <div class="color-swatch" data-color="#9B9B9B" style="background-color: #9B9B9B;"></div>
+                    <div class="color-swatch" data-color="#FFFFFF" style="background-color: #FFFFFF;"></div>
+                </div>
+
                 <label for="profile-pic">프로필 사진:</label>
                 <input type="file" id="profile-pic" name="profile-pic" accept="image/*">
                 <label for="company-logo-input">회사 로고:</label>
                 <input type="file" id="company-logo-input" name="company-logo-input" accept="image/*">
+
+                <label for="background-color">배경색:</label>
+                <input type="color" id="background-color" name="background-color" value="#ffffff">
+                <div class="color-palette" data-for="background-color">
+                    <div class="color-swatch" data-color="#FFFFFF" style="background-color: #FFFFFF;"></div>
+                    <div class="color-swatch" data-color="#F5F5F5" style="background-color: #F5F5F5;"></div>
+                    <div class="color-swatch" data-color="#E8E8E8" style="background-color: #E8E8E8;"></div>
+                    <div class="color-swatch" data-color="#D8D8D8" style="background-color: #D8D8D8;"></div>
+                </div>
+
                 <button type="submit">명함 생성</button>
             </form>
         </div>
@@ -36,6 +76,7 @@
             <div id="business-card-preview">
                 <business-card
                     name="홍길동"
+                    name-color="#000000"
                     title="개발자"
                     department="개발팀"
                     company="(주)멋진회사"
@@ -44,13 +85,18 @@
                     personal-phone="010-9876-5432"
                     email="gildong.hong@example.com"
                     website="www.example.com"
+                    tagline-main="Leading Technology Provider"
+                    tagline-main-color="#ff0000"
+                    tagline-sub="Since 1990"
+                    tagline-sub-color="#000000"
                     profile-pic="./profile_placeholder.png"
-                    company-logo="./company-logo.svg">
+                    company-logo="./company-logo.svg"
+                    background-color="#ffffff">
                 </business-card>
             </div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="main.js?v=3.0"></script>
+    <script src="main.js?v=3.4"></script>
 </body>
 </html>
