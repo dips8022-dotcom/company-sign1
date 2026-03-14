@@ -22,6 +22,11 @@ class BusinessCard extends HTMLElement {
         this.render();
     }
 
+    isMobile() {
+        // A simple check for mobile user agents.
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
     adjustTaglineFontSize() {
         const details = this.shadowRoot.querySelector('.details');
         if (!details) return;
@@ -30,21 +35,13 @@ class BusinessCard extends HTMLElement {
         const adjust = (element, initialSize, minSize) => {
             if (!element) return;
 
-            // 1. Reset font size to the initial value for an accurate measurement.
             element.style.fontSize = initialSize + 'pt';
+            void(element.offsetWidth); // Force browser reflow for accurate measurement
 
-            // 2. Force browser reflow. Reading a layout property like offsetWidth syncs the layout,
-            // ensuring the scrollWidth we read next is accurate after the style change.
-            void(element.offsetWidth);
-
-            // 3. Now, measure the accurate width.
             const textWidth = element.scrollWidth;
-            
-            // 4. Use a generous safety margin to avoid any edge clipping.
-            const safetyMargin = 30; // 30px safety margin
+            const safetyMargin = 15; // A safety margin to prevent clipping
             const availableWidth = parentWidth - safetyMargin;
 
-            // 5. If the text overflows, calculate and apply the new smaller font size.
             if (textWidth > availableWidth) {
                 const newSize = initialSize * (availableWidth / textWidth);
                 element.style.fontSize = Math.max(newSize, minSize) + 'pt';
@@ -55,6 +52,63 @@ class BusinessCard extends HTMLElement {
         const taglineSub = this.shadowRoot.querySelector('.tagline-sub');
         adjust(taglineMain, 9, 4);
         adjust(taglineSub, 8, 4);
+    }
+    
+    async performCapture(action) {
+        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
+        if (!businessCardContent) return;
+
+        const taglineEl = this.shadowRoot.querySelector('.tagline');
+        // In the CSS, the mobile view (@media max-width: 400px) already uses center alignment.
+        // We only need to apply this workaround if the user is on mobile AND the current alignment is NOT center.
+        const isMobileAndRightAligned = this.isMobile() && getComputedStyle(taglineEl).alignItems !== 'center';
+        const originalAlign = taglineEl ? getComputedStyle(taglineEl).alignItems : '';
+
+        try {
+            // Mobile-Only Workaround: Temporarily force center-align to bypass html2canvas clipping bug for right-aligned text.
+            if (isMobileAndRightAligned && taglineEl) {
+                taglineEl.style.alignItems = 'center';
+                // We need to re-adjust the font size after changing the alignment, as it can affect the available space.
+                this.adjustTaglineFontSize();
+            }
+
+            // Wait for the browser to fully render all changes.
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // Capture the canvas.
+            const canvas = await html2canvas(businessCardContent, {
+                backgroundColor: this.getAttribute('background-color') || '#ffffff',
+                useCORS: true,
+                scale: 2
+            });
+
+            // Perform the requested action (copy or download).
+            if (action === 'copy') {
+                canvas.toBlob(blob => {
+                    if(blob) {
+                        navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
+                            alert('명함이 이미지로 복사되었습니다!');
+                        }).catch(err => {
+                            console.error('이미지 복사 실패: ', err);
+                            alert('오류: 명함 복사에 실패했습니다.');
+                        });
+                    }
+                });
+            } else if (action === 'download') {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.download = 'business-card.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+        } finally {
+            // IMPORTANT: Always restore the original alignment if it was changed.
+            if (isMobileAndRightAligned && taglineEl) {
+                taglineEl.style.alignItems = originalAlign;
+            }
+        }
     }
 
     render() {
@@ -148,6 +202,7 @@ class BusinessCard extends HTMLElement {
                 .download-jpg { background-color: #ffc107; color: black; }
                 .delete { background-color: #dc3545; color: white; }
 
+                /* This media query is key. It changes the alignment on smaller screens. */
                 @media (max-width: 400px) {
                     .business-card {
                         flex-direction: column;
@@ -160,7 +215,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        align-items: center;
+                        align-items: center; /* Default for mobile is center */
                     }
                 }
             </style>
@@ -186,12 +241,11 @@ class BusinessCard extends HTMLElement {
             </div>
         `;
         
-        // Defer the font size adjustment until after the browser has rendered the new content
         setTimeout(() => this.adjustTaglineFontSize(), 0);
 
         this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
-        this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.copyAsImage());
-        this.shadowRoot.querySelector('.download-jpg').addEventListener('click', () => this.downloadAsJPG());
+        this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.performCapture('copy'));
+        this.shadowRoot.querySelector('.download-jpg').addEventListener('click', () => this.performCapture('download'));
         this.shadowRoot.querySelector('.delete').addEventListener('click', () => this.remove());
     }
 
@@ -215,60 +269,6 @@ class BusinessCard extends HTMLElement {
                 alert('오류: 명함 복사에 실패했습니다.');
             });
         }
-    }
-
-    async copyAsImage() {
-        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
-        if (!businessCardContent) return;
-
-        this.adjustTaglineFontSize();
-        
-        // Add a long, explicit delay. This is a crucial failsafe to ensure the browser 
-        // has fully rendered all changes (especially the new font size) before capturing the image.
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const options = {
-            backgroundColor: this.getAttribute('background-color') || '#ffffff',
-            useCORS: true,
-            scale: 2
-        };
-
-        const canvas = await html2canvas(businessCardContent, options);
-        canvas.toBlob(blob => {
-            if(blob) {
-                navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
-                    alert('명함이 이미지로 복사되었습니다!');
-                }).catch(err => {
-                    console.error('이미지 복사 실패: ', err);
-                    alert('오류: 명함 복사에 실패했습니다.');
-                });
-            }
-        });
-    }
-    
-    async downloadAsJPG() {
-        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
-        if (!businessCardContent) return;
-
-        this.adjustTaglineFontSize();
-
-        // Add a long, explicit delay. This is a crucial failsafe to ensure the browser 
-        // has fully rendered all changes (especially the new font size) before capturing the image.
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const options = {
-            backgroundColor: this.getAttribute('background-color') || '#ffffff',
-            useCORS: true,
-            scale: 2
-        };
-
-        const canvas = await html2canvas(businessCardContent, options);
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/jpeg', 0.9);
-        link.download = 'business-card.jpg';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     }
 }
 
