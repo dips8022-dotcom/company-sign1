@@ -6,6 +6,12 @@ class BusinessCard extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        // Adjust font size on window resize
+        window.addEventListener('resize', () => this.adjustTaglineFontSize());
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('resize', () => this.adjustTaglineFontSize());
     }
 
     static get observedAttributes() {
@@ -20,20 +26,21 @@ class BusinessCard extends HTMLElement {
         const tagline = this.shadowRoot.querySelector('.tagline');
         const taglineMain = this.shadowRoot.querySelector('.tagline-main');
 
-        if (!tagline || !taglineMain) {
-            return;
-        }
+        if (!tagline || !taglineMain) return;
 
-        // Reset font size to initial value to handle cases where text gets shorter
-        taglineMain.style.fontSize = ''; 
-        let currentFontSize = 9; // Initial font size in points from the CSS
+        // Reset font size to measure correctly
+        taglineMain.style.fontSize = '9pt';
 
-        if (tagline.clientWidth > 0) {
-            // Reduce font size until it fits
-            while (tagline.scrollWidth > tagline.clientWidth && currentFontSize > 4) {
-                currentFontSize -= 0.5;
-                taglineMain.style.fontSize = currentFontSize + 'pt';
-            }
+        const parentWidth = tagline.clientWidth;
+        const textWidth = taglineMain.scrollWidth;
+        const initialFontSize = 9; // Base font size in pt
+
+        if (textWidth > parentWidth) {
+            // Calculate new font size and apply a small buffer
+            const newSize = initialFontSize * (parentWidth / textWidth) * 0.98;
+            taglineMain.style.fontSize = Math.max(newSize, 4) + 'pt'; // Don't let font size be too small
+        } else {
+            taglineMain.style.fontSize = initialFontSize + 'pt'; // Reset to default
         }
     }
 
@@ -165,8 +172,9 @@ class BusinessCard extends HTMLElement {
                 <button class="delete">삭제</button>
             </div>
         `;
-
-        this.adjustTaglineFontSize();
+        
+        // Defer the font size adjustment until after the browser has rendered the new content
+        setTimeout(() => this.adjustTaglineFontSize(), 0);
 
         this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.copyAsImage());
@@ -196,51 +204,57 @@ class BusinessCard extends HTMLElement {
         }
     }
 
-    copyAsImage() {
+    async copyAsImage() {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
-        if (businessCardContent) {
-             const options = {
-                backgroundColor: this.getAttribute('background-color') || '#ffffff',
-                useCORS: true,
-                width: businessCardContent.offsetWidth,
-                height: businessCardContent.offsetHeight,
-                scale: 2
-             };
+        if (!businessCardContent) return;
 
-             html2canvas(businessCardContent, options).then(canvas => {
-                canvas.toBlob(blob => {
-                    if(blob) {
-                        navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
-                            alert('명함이 이미지로 복사되었습니다!');
-                        }).catch(err => {
-                            console.error('이미지 복사 실패: ', err);
-                        });
-                    }
+        // Ensure font size is correct for the canvas rendering
+        this.adjustTaglineFontSize();
+
+        const options = {
+            backgroundColor: this.getAttribute('background-color') || '#ffffff',
+            useCORS: true,
+            scale: 2
+        };
+
+        const canvas = await html2canvas(businessCardContent, options);
+        canvas.toBlob(blob => {
+            if(blob) {
+                navigator.clipboard.write([new ClipboardItem({'image/png': blob})]).then(() => {
+                    alert('명함이 이미지로 복사되었습니다!');
+                }).catch(err => {
+                    console.error('이미지 복사 실패: ', err);
+                    alert('오류: 명함 복사에 실패했습니다.');
                 });
-            });
-        }
+            }
+        });
+        // Re-render to restore live view, just in case
+        this.render();
     }
     
-    downloadAsJPG() {
+    async downloadAsJPG() {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
-        if (businessCardContent) {
-            const options = {
-                backgroundColor: this.getAttribute('background-color') || '#ffffff',
-                useCORS: true,
-                width: businessCardContent.offsetWidth,
-                height: businessCardContent.offsetHeight,
-                scale: 2
-            };
+        if (!businessCardContent) return;
 
-             html2canvas(businessCardContent, options).then(canvas => {
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
-                link.download = 'business-card.jpg';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        }
+        // Ensure font size is correct for the canvas rendering
+        this.adjustTaglineFontSize();
+
+        const options = {
+            backgroundColor: this.getAttribute('background-color') || '#ffffff',
+            useCORS: true,
+            scale: 2
+        };
+
+        const canvas = await html2canvas(businessCardContent, options);
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.download = 'business-card.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Re-render to restore live view, just in case
+        this.render();
     }
 }
 
