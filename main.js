@@ -147,7 +147,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        text-align: center;
+                        text-align: right;
                     }
                 }
             </style>
@@ -208,8 +208,8 @@ class BusinessCard extends HTMLElement {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (!businessCardContent) return;
 
-        // Ensure font size is correct for the canvas rendering
         this.adjustTaglineFontSize();
+        await new Promise(resolve => requestAnimationFrame(resolve));
 
         const options = {
             backgroundColor: this.getAttribute('background-color') || '#ffffff',
@@ -228,7 +228,7 @@ class BusinessCard extends HTMLElement {
                 });
             }
         });
-        // Re-render to restore live view, just in case
+
         this.render();
     }
     
@@ -236,8 +236,8 @@ class BusinessCard extends HTMLElement {
         const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
         if (!businessCardContent) return;
 
-        // Ensure font size is correct for the canvas rendering
         this.adjustTaglineFontSize();
+        await new Promise(resolve => requestAnimationFrame(resolve));
 
         const options = {
             backgroundColor: this.getAttribute('background-color') || '#ffffff',
@@ -253,7 +253,6 @@ class BusinessCard extends HTMLElement {
         link.click();
         document.body.removeChild(link);
 
-        // Re-render to restore live view, just in case
         this.render();
     }
 }
