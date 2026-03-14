@@ -119,7 +119,8 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        text-align: center;
+                        text-align: right;
+                        white-space: nowrap;
                     }
                 }
             </style>
