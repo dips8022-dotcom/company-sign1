@@ -158,9 +158,7 @@ class BusinessCard extends HTMLElement {
                 ${businessCardContent.outerHTML}
             `;
             
-            navigator.clipboard.write([new ClipboardItem({
-                'text/html': new Blob([htmlToCopy], { type: 'text/html' })
-            })]).then(() => {
+            navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([htmlToCopy], { type: 'text/html' }) })]).then(() => {
                 alert('명함이 서식과 함께 복사되었습니다!');
             }).catch(err => {
                 console.error('HTML 명함 복사 실패: ', err);
@@ -225,28 +223,32 @@ const businessCard = preview.querySelector('business-card');
 
 const updateCard = () => {
     const formData = new FormData(form);
-    const fileInput = document.getElementById('profile-pic');
-    const file = fileInput.files[0];
-
-    for(const [name, value] of formData.entries()) {
-        if (name !== 'profile-pic') {
+    for (const [name, value] of formData.entries()) {
+        if (name !== 'profile-pic' && name !== 'company-logo-input') {
             businessCard.setAttribute(name, value);
         }
     }
 
-    if (file) {
+    const profilePicInput = document.getElementById('profile-pic');
+    const profilePicFile = profilePicInput.files[0];
+    if (profilePicFile) {
         const reader = new FileReader();
         reader.onload = (e) => {
             businessCard.setAttribute('profile-pic', e.target.result);
         };
-        reader.readAsDataURL(file);
-    } else {
-        const profilePicUrl = formData.get('profile-pic');
-        if (!profilePicUrl) {
-            businessCard.removeAttribute('profile-pic');
-        }
+        reader.readAsDataURL(profilePicFile);
     }
-}
+
+    const companyLogoInput = document.getElementById('company-logo-input');
+    const companyLogoFile = companyLogoInput.files[0];
+    if (companyLogoFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            businessCard.setAttribute('company-logo', e.target.result);
+        };
+        reader.readAsDataURL(companyLogoFile);
+    }
+};
 
 form.addEventListener('input', updateCard);
 
