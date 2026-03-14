@@ -23,25 +23,27 @@ class BusinessCard extends HTMLElement {
     }
 
     adjustTaglineFontSize() {
-        const tagline = this.shadowRoot.querySelector('.tagline');
+        const details = this.shadowRoot.querySelector('.details');
         const taglineMain = this.shadowRoot.querySelector('.tagline-main');
+        const taglineSub = this.shadowRoot.querySelector('.tagline-sub');
 
-        if (!tagline || !taglineMain) return;
+        const adjust = (element, initialSize, minSize) => {
+            if (!details || !element) return;
 
-        // Reset font size to measure correctly
-        taglineMain.style.fontSize = '9pt';
+            element.style.fontSize = ''; // Reset
+            element.style.fontSize = initialSize + 'pt';
 
-        const parentWidth = tagline.clientWidth;
-        const textWidth = taglineMain.scrollWidth;
-        const initialFontSize = 9; // Base font size in pt
+            const parentWidth = details.clientWidth;
+            const textWidth = element.scrollWidth;
 
-        if (textWidth > parentWidth) {
-            // Calculate new font size and apply a small buffer
-            const newSize = initialFontSize * (parentWidth / textWidth) * 0.98;
-            taglineMain.style.fontSize = Math.max(newSize, 4) + 'pt'; // Don't let font size be too small
-        } else {
-            taglineMain.style.fontSize = initialFontSize + 'pt'; // Reset to default
+            if (textWidth > parentWidth) {
+                const newSize = initialSize * (parentWidth / textWidth) * 0.95; // 5% buffer
+                element.style.fontSize = Math.max(newSize, minSize) + 'pt';
+            }
         }
+
+        adjust(taglineMain, 9, 4);
+        adjust(taglineSub, 8, 4);
     }
 
     render() {
