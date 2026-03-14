@@ -30,15 +30,21 @@ class BusinessCard extends HTMLElement {
         const adjust = (element, initialSize, minSize) => {
             if (!details || !element) return;
 
-            element.style.fontSize = ''; // Reset
+            // Apply initial font size to measure correctly
             element.style.fontSize = initialSize + 'pt';
 
             const parentWidth = details.clientWidth;
             const textWidth = element.scrollWidth;
 
-            if (textWidth > parentWidth) {
-                const newSize = initialSize * (parentWidth / textWidth) * 0.95; // 5% buffer
+            // A very generous safety margin (15px) to be absolutely sure no clipping occurs.
+            const safetyMargin = 15;
+            const availableWidth = parentWidth - safetyMargin;
+
+            if (textWidth > availableWidth) {
+                const newSize = initialSize * (availableWidth / textWidth);
                 element.style.fontSize = Math.max(newSize, minSize) + 'pt';
+            } else {
+                element.style.fontSize = initialSize + 'pt'; // Reset to default if it fits
             }
         }
 
@@ -149,7 +155,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        text-align: right;
+                        text-align: center;
                     }
                 }
             </style>
