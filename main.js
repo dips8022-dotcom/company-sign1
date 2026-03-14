@@ -16,6 +16,27 @@ class BusinessCard extends HTMLElement {
         this.render();
     }
 
+    adjustTaglineFontSize() {
+        const tagline = this.shadowRoot.querySelector('.tagline');
+        const taglineMain = this.shadowRoot.querySelector('.tagline-main');
+
+        if (!tagline || !taglineMain) {
+            return;
+        }
+
+        // Reset font size to initial value to handle cases where text gets shorter
+        taglineMain.style.fontSize = ''; 
+        let currentFontSize = 9; // Initial font size in points from the CSS
+
+        if (tagline.clientWidth > 0) {
+            // Reduce font size until it fits
+            while (tagline.scrollWidth > tagline.clientWidth && currentFontSize > 4) {
+                currentFontSize -= 0.5;
+                taglineMain.style.fontSize = currentFontSize + 'pt';
+            }
+        }
+    }
+
     render() {
         this.shadowRoot.innerHTML = '';
         const name = this.getAttribute('name');
@@ -95,7 +116,7 @@ class BusinessCard extends HTMLElement {
                 .details a:hover { text-decoration: underline; }
                 h3 { font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
 
-                .tagline { text-align: right; margin-bottom: 5px; margin-top: 8px; white-space: nowrap; }
+                .tagline { text-align: right; margin-bottom: 5px; margin-top: 8px; white-space: nowrap; overflow: hidden; }
                 .tagline-main, .tagline-sub { display: block; line-height: 1; }
                 .tagline-main { font-weight: bold; font-size: 9pt; }
                 .tagline-sub { font-size: 8pt; margin-top: 0px; }
@@ -119,8 +140,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        text-align: right;
-                        white-space: nowrap;
+                        text-align: center;
                     }
                 }
             </style>
@@ -145,6 +165,8 @@ class BusinessCard extends HTMLElement {
                 <button class="delete">삭제</button>
             </div>
         `;
+
+        this.adjustTaglineFontSize();
 
         this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.copyAsImage());
