@@ -24,30 +24,35 @@ class BusinessCard extends HTMLElement {
 
     adjustTaglineFontSize() {
         const details = this.shadowRoot.querySelector('.details');
-        const taglineMain = this.shadowRoot.querySelector('.tagline-main');
-        const taglineSub = this.shadowRoot.querySelector('.tagline-sub');
+        if (!details) return;
+        const parentWidth = details.clientWidth;
 
         const adjust = (element, initialSize, minSize) => {
-            if (!details || !element) return;
+            if (!element) return;
 
-            // Apply initial font size to measure correctly
+            // 1. Reset font size to the initial value for an accurate measurement.
             element.style.fontSize = initialSize + 'pt';
 
-            const parentWidth = details.clientWidth;
-            const textWidth = element.scrollWidth;
+            // 2. Force browser reflow. Reading a layout property like offsetWidth syncs the layout,
+            // ensuring the scrollWidth we read next is accurate after the style change.
+            void(element.offsetWidth);
 
-            // A very generous safety margin (15px) to be absolutely sure no clipping occurs.
-            const safetyMargin = 15;
+            // 3. Now, measure the accurate width.
+            const textWidth = element.scrollWidth;
+            
+            // 4. Use a generous safety margin to avoid any edge clipping.
+            const safetyMargin = 30; // 30px safety margin
             const availableWidth = parentWidth - safetyMargin;
 
+            // 5. If the text overflows, calculate and apply the new smaller font size.
             if (textWidth > availableWidth) {
                 const newSize = initialSize * (availableWidth / textWidth);
                 element.style.fontSize = Math.max(newSize, minSize) + 'pt';
-            } else {
-                element.style.fontSize = initialSize + 'pt'; // Reset to default if it fits
             }
-        }
+        };
 
+        const taglineMain = this.shadowRoot.querySelector('.tagline-main');
+        const taglineSub = this.shadowRoot.querySelector('.tagline-sub');
         adjust(taglineMain, 9, 4);
         adjust(taglineSub, 8, 4);
     }
@@ -131,10 +136,10 @@ class BusinessCard extends HTMLElement {
                 .details a:hover { text-decoration: underline; }
                 h3 { font-weight: bold; font-size: 12pt; margin-bottom: 2px;}
 
-                .tagline { text-align: right; margin-bottom: 5px; margin-top: 8px; white-space: nowrap; overflow: hidden; }
-                .tagline-main, .tagline-sub { display: block; line-height: 1; }
+                .tagline { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px; margin-top: 8px; overflow: hidden; }
+                .tagline-main, .tagline-sub { white-space: nowrap; line-height: 1; }
                 .tagline-main { font-weight: bold; font-size: 9pt; }
-                .tagline-sub { font-size: 8pt; margin-top: 0px; }
+                .tagline-sub { font-size: 8pt; margin-top: 2px; }
 
                 .actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
                 button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
@@ -155,7 +160,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        text-align: center;
+                        align-items: center;
                     }
                 }
             </style>
@@ -217,7 +222,10 @@ class BusinessCard extends HTMLElement {
         if (!businessCardContent) return;
 
         this.adjustTaglineFontSize();
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        
+        // Add a long, explicit delay. This is a crucial failsafe to ensure the browser 
+        // has fully rendered all changes (especially the new font size) before capturing the image.
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         const options = {
             backgroundColor: this.getAttribute('background-color') || '#ffffff',
@@ -236,8 +244,6 @@ class BusinessCard extends HTMLElement {
                 });
             }
         });
-
-        this.render();
     }
     
     async downloadAsJPG() {
@@ -245,7 +251,10 @@ class BusinessCard extends HTMLElement {
         if (!businessCardContent) return;
 
         this.adjustTaglineFontSize();
-        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        // Add a long, explicit delay. This is a crucial failsafe to ensure the browser 
+        // has fully rendered all changes (especially the new font size) before capturing the image.
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         const options = {
             backgroundColor: this.getAttribute('background-color') || '#ffffff',
@@ -260,8 +269,6 @@ class BusinessCard extends HTMLElement {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        this.render();
     }
 }
 
