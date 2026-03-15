@@ -259,11 +259,14 @@ class BusinessCard extends HTMLElement {
         const email = this.getAttribute('email') || '';
         const website = this.getAttribute('website') || '';
 
+        const isKorean = /[\uac00-\ud7a3]/.test(name);
+        const fontFamily = isKorean ? "'Malgun Gothic', sans-serif" : "sans-serif";
+
         const titleAndDepartment = [title, department].filter(Boolean).join(' | ');
         const contactNumbers = [phone ? `P: ${phone}` : '', personalPhone ? `M: ${personalPhone}` : ''].filter(Boolean).join(' | ');
 
         const signatureHtml = `
-            <table cellpadding="0" cellspacing="0" style="border: none; border-collapse: collapse; font-family: sans-serif; font-size: 10pt; color: #333;">
+            <table cellpadding="0" cellspacing="0" style="border: none; border-collapse: collapse; font-family: ${fontFamily}; font-size: 10pt; color: #333;">
                 <tr>
                     <td style="padding: 0; text-align: left;">
                         <p style="margin: 0; color: ${nameColor};"><b>${name}</b></p>
