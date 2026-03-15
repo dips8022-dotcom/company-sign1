@@ -175,7 +175,7 @@ class BusinessCard extends HTMLElement {
                 overflow: hidden;
             }
             .info-block {
-                padding-left: ${!hasImages ? '10%' : '0'};
+                padding-left: ${!hasImages ? '2%' : '0'};
             }
             .profile-pic img { border-radius: 50%; width: 80px; height: 80px; object-fit: cover; }
             .company-logo img { max-height: 23px; width: auto; max-width: 100%; }
@@ -266,9 +266,9 @@ class BusinessCard extends HTMLElement {
             <table cellpadding="0" cellspacing="0" style="border: none; border-collapse: collapse; font-family: sans-serif; font-size: 10pt; color: #333;">
                 <tr>
                     <td style="padding: 0; text-align: left;">
-                        <p style="margin: 0; font-weight: bold; color: ${nameColor};">${name}</p>
+                        <p style="margin: 0; color: ${nameColor};"><b>${name}</b></p>
                         ${titleAndDepartment ? `<p style="margin: 0;">${titleAndDepartment}</p>` : ''}
-                        ${company ? `<p style="margin: 0; font-weight: bold;">${company}</p>` : ''}
+                        ${company ? `<p style="margin: 0;"><b>${company}</b></p>` : ''}
                         ${address ? `<p style="margin: 0;">${address}</p>` : ''}
                         ${contactNumbers ? `<p style="margin: 0;">${contactNumbers}</p>` : ''}
                         <p style="margin: 0;">
