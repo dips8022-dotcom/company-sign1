@@ -197,7 +197,7 @@ class BusinessCard extends HTMLElement {
 
                 .actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }
                 button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
-                .copy-text { background-color: #0078D4; color: white; }
+                .copy-signature { background-color: #0078D4; color: white; }
                 .copy-image { background-color: #28a745; color: white; }
                 .download-jpg { background-color: #ffc107; color: black; }
                 .delete { background-color: #dc3545; color: white; }
@@ -234,7 +234,7 @@ class BusinessCard extends HTMLElement {
             </div>
 
             <div class="actions">
-                <button class="copy-text">텍스트로 복사</button>
+                <button class="copy-signature">서명으로 복사</button>
                 <button class="copy-image">이미지로 복사</button>
                 <button class="download-jpg">JPG로 다운로드</button>
                 <button class="delete">삭제</button>
@@ -243,32 +243,81 @@ class BusinessCard extends HTMLElement {
         
         setTimeout(() => this.adjustTaglineFontSize(), 0);
 
-        this.shadowRoot.querySelector('.copy-text').addEventListener('click', () => this.copyAsText());
+        this.shadowRoot.querySelector('.copy-signature').addEventListener('click', () => this.saveAsSignatureFile());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.performCapture('copy'));
         this.shadowRoot.querySelector('.download-jpg').addEventListener('click', () => this.performCapture('download'));
         this.shadowRoot.querySelector('.delete').addEventListener('click', () => this.remove());
     }
 
-    copyAsText() {
-        const businessCardContent = this.shadowRoot.querySelector('#business-card-content');
-        const styleContent = this.shadowRoot.querySelector('style').innerHTML;
+    saveAsSignatureFile() {
+        const name = this.getAttribute('name') || '';
+        const nameColor = this.getAttribute('name-color') || '#000000';
+        const title = this.getAttribute('title') || '';
+        const department = this.getAttribute('department') || '';
+        const company = this.getAttribute('company') || '';
+        const address = this.getAttribute('address') || '';
+        const phone = this.getAttribute('phone') || '';
+        const personalPhone = this.getAttribute('personal-phone') || '';
+        const email = this.getAttribute('email') || '';
+        const website = this.getAttribute('website') || '';
+        const profilePic = this.getAttribute('profile-pic');
+        const companyLogo = this.getAttribute('company-logo');
+        const taglineMain = this.getAttribute('tagline-main') || '';
+        const taglineMainColor = this.getAttribute('tagline-main-color') || '#ff0000';
+        const taglineSub = this.getAttribute('tagline-sub') || '';
+        const taglineSubColor = this.getAttribute('tagline-sub-color') || '#000000';
+        const backgroundColor = this.getAttribute('background-color') || '#ffffff';
 
-        if (businessCardContent) {
-            const htmlToCopy = `
-                <meta charset="UTF-8">
-                <style>
-                    ${styleContent}
-                </style>
-                ${businessCardContent.outerHTML}
-            `;
-            
-            navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([htmlToCopy], { type: 'text/html' }) })]).then(() => {
-                alert('명함이 서식과 함께 복사되었습니다!');
-            }).catch(err => {
-                console.error('HTML 명함 복사 실패: ', err);
-                alert('오류: 명함 복사에 실패했습니다.');
-            });
-        }
+        const titleAndDepartment = [title, department].filter(Boolean).join(' | ');
+        const contactNumbers = [phone ? `P: ${phone}` : '', personalPhone ? `M: ${personalPhone}` : ''].filter(Boolean).join(' | ');
+
+        const profilePicHtml = profilePic ? `<tr><td style="padding: 0; text-align: center;"><img src="${profilePic}" alt="프로필" style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;"></td></tr>` : '';
+        const companyLogoHtml = companyLogo ? `<tr><td style="padding: 5px 0 0 0; text-align: center;"><img src="${companyLogo}" alt="회사 로고" style="max-height: 23px; width: auto; max-width: 100px;"></td></tr>` : '';
+
+        const signatureHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8">
+            <title>Email Signature</title>
+            </head>
+            <body>
+            <table style="border: none; border-collapse: collapse; font-family: sans-serif; background-color: ${backgroundColor}; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="padding-right: 20px; vertical-align: top;">
+                        <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                            ${profilePicHtml}
+                            ${companyLogoHtml}
+                        </table>
+                    </td>
+                    <td style="font-size: 9pt; color: #000; vertical-align: top; text-align: left;">
+                        <div style="text-align: right; margin-bottom: 8px;">
+                            <div style="font-weight: bold; font-size: 9pt; color: ${taglineMainColor}; line-height: 1; white-space: nowrap;">${taglineMain}</div>
+                            <div style="font-size: 8pt; color: ${taglineSubColor}; line-height: 1; margin-top: 2px; white-space: nowrap;">${taglineSub}</div>
+                        </div>
+                        <h3 style="font-size: 12pt; font-weight: bold; color: ${nameColor}; margin: 0 0 2px 0;">${name}</h3>
+                        ${titleAndDepartment ? `<p style="margin: 0; line-height: 1.5;">${titleAndDepartment}</p>` : ''}
+                        ${company ? `<p style="margin: 0; line-height: 1.5;"><strong>${company}</strong></p>` : ''}
+                        ${address ? `<p style="margin: 0; line-height: 1.5;">${address}</p>` : ''}
+                        ${contactNumbers ? `<p style="margin: 0; line-height: 1.5;">${contactNumbers}</p>` : ''}
+                        ${email ? `<p style="margin: 0; line-height: 1.5;"><a href="mailto:${email}" style="color: #000; text-decoration: none;">${email}</a></p>` : ''}
+                        ${website ? `<p style="margin: 0; line-height: 1.5;"><a href="${website}" target="_blank" style="color: #000; text-decoration: none;">${website}</a></p>` : ''}
+                    </td>
+                </tr>
+            </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([signatureHtml], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'email_signature.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        alert('서명이 email_signature.html 파일로 저장되었습니다!');
     }
 }
 
@@ -294,6 +343,9 @@ const updateCard = () => {
             businessCard.setAttribute('profile-pic', e.target.result);
         };
         reader.readAsDataURL(profilePicFile);
+    } else {
+        // Clear the profile pic if no file is selected
+        // businessCard.removeAttribute('profile-pic');
     }
 
     const companyLogoInput = document.getElementById('company-logo-input');
@@ -304,6 +356,9 @@ const updateCard = () => {
             businessCard.setAttribute('company-logo', e.target.result);
         };
         reader.readAsDataURL(companyLogoFile);
+    } else {
+         // Clear the company logo if no file is selected
+        // businessCard.removeAttribute('company-logo');
     }
 };
 
@@ -311,15 +366,9 @@ form.addEventListener('input', updateCard);
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const newCard = document.createElement('business-card');
-    const oldCard = preview.querySelector('business-card');
-    
-    for (const attr of oldCard.attributes) {
-        newCard.setAttribute(attr.name, attr.value);
-    }
-
-    preview.innerHTML = ''; 
-    preview.appendChild(newCard);
+    // This part is mainly for show in this UI, the preview is updated live.
+    // But you could use this to add multiple cards to a list, for example.
+    alert('명함 미리보기가 업데이트되었습니다.');
 });
 
 document.querySelectorAll('.color-palette').forEach(palette => {
@@ -330,7 +379,8 @@ document.querySelectorAll('.color-palette').forEach(palette => {
             const targetInput = document.getElementById(targetInputId);
             if (targetInput) {
                 targetInput.value = color;
-                updateCard();
+                // Create and dispatch an input event to trigger the update
+                targetInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
     });
