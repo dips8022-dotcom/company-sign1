@@ -202,7 +202,6 @@ class BusinessCard extends HTMLElement {
                 .download-jpg { background-color: #ffc107; color: black; }
                 .delete { background-color: #dc3545; color: white; }
 
-                /* This media query is key. It changes the alignment on smaller screens. */
                 @media (max-width: 400px) {
                     .business-card {
                         flex-direction: column;
@@ -215,7 +214,7 @@ class BusinessCard extends HTMLElement {
                         text-align: center;
                     }
                     .tagline {
-                        align-items: center; /* Default for mobile is center */
+                        align-items: center;
                     }
                 }
             </style>
@@ -243,13 +242,13 @@ class BusinessCard extends HTMLElement {
         
         setTimeout(() => this.adjustTaglineFontSize(), 0);
 
-        this.shadowRoot.querySelector('.copy-signature').addEventListener('click', () => this.saveAsSignatureFile());
+        this.shadowRoot.querySelector('.copy-signature').addEventListener('click', () => this.copyAsCleanSignature());
         this.shadowRoot.querySelector('.copy-image').addEventListener('click', () => this.performCapture('copy'));
         this.shadowRoot.querySelector('.download-jpg').addEventListener('click', () => this.performCapture('download'));
         this.shadowRoot.querySelector('.delete').addEventListener('click', () => this.remove());
     }
 
-    saveAsSignatureFile() {
+    copyAsCleanSignature() {
         const name = this.getAttribute('name') || '';
         const nameColor = this.getAttribute('name-color') || '#000000';
         const title = this.getAttribute('title') || '';
@@ -260,64 +259,45 @@ class BusinessCard extends HTMLElement {
         const personalPhone = this.getAttribute('personal-phone') || '';
         const email = this.getAttribute('email') || '';
         const website = this.getAttribute('website') || '';
-        const profilePic = this.getAttribute('profile-pic');
-        const companyLogo = this.getAttribute('company-logo');
-        const taglineMain = this.getAttribute('tagline-main') || '';
-        const taglineMainColor = this.getAttribute('tagline-main-color') || '#ff0000';
-        const taglineSub = this.getAttribute('tagline-sub') || '';
-        const taglineSubColor = this.getAttribute('tagline-sub-color') || '#000000';
-        const backgroundColor = this.getAttribute('background-color') || '#ffffff';
 
         const titleAndDepartment = [title, department].filter(Boolean).join(' | ');
         const contactNumbers = [phone ? `P: ${phone}` : '', personalPhone ? `M: ${personalPhone}` : ''].filter(Boolean).join(' | ');
 
-        const profilePicHtml = profilePic ? `<tr><td style="padding: 0; text-align: center;"><img src="${profilePic}" alt="프로필" style="border-radius: 50%; width: 80px; height: 80px; object-fit: cover;"></td></tr>` : '';
-        const companyLogoHtml = companyLogo ? `<tr><td style="padding: 5px 0 0 0; text-align: center;"><img src="${companyLogo}" alt="회사 로고" style="max-height: 23px; width: auto; max-width: 100px;"></td></tr>` : '';
-
         const signatureHtml = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <meta charset="UTF-8">
-            <title>Email Signature</title>
-            </head>
-            <body>
-            <table style="border: none; border-collapse: collapse; font-family: sans-serif; background-color: ${backgroundColor}; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td style="padding-right: 20px; vertical-align: top;">
-                        <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                            ${profilePicHtml}
-                            ${companyLogoHtml}
-                        </table>
-                    </td>
-                    <td style="font-size: 9pt; color: #000; vertical-align: top; text-align: left;">
-                        <div style="text-align: right; margin-bottom: 8px;">
-                            <div style="font-weight: bold; font-size: 9pt; color: ${taglineMainColor}; line-height: 1; white-space: nowrap;">${taglineMain}</div>
-                            <div style="font-size: 8pt; color: ${taglineSubColor}; line-height: 1; margin-top: 2px; white-space: nowrap;">${taglineSub}</div>
-                        </div>
-                        <h3 style="font-size: 12pt; font-weight: bold; color: ${nameColor}; margin: 0 0 2px 0;">${name}</h3>
-                        ${titleAndDepartment ? `<p style="margin: 0; line-height: 1.5;">${titleAndDepartment}</p>` : ''}
-                        ${company ? `<p style="margin: 0; line-height: 1.5;"><strong>${company}</strong></p>` : ''}
-                        ${address ? `<p style="margin: 0; line-height: 1.5;">${address}</p>` : ''}
-                        ${contactNumbers ? `<p style="margin: 0; line-height: 1.5;">${contactNumbers}</p>` : ''}
-                        ${email ? `<p style="margin: 0; line-height: 1.5;"><a href="mailto:${email}" style="color: #000; text-decoration: none;">${email}</a></p>` : ''}
-                        ${website ? `<p style="margin: 0; line-height: 1.5;"><a href="${website}" target="_blank" style="color: #000; text-decoration: none;">${website}</a></p>` : ''}
-                    </td>
-                </tr>
-            </table>
-            </body>
-            </html>
+            <div style="font-family: sans-serif; font-size: 10pt; color: #333;">
+                <p style="margin: 0; font-weight: bold; color: ${nameColor};">${name}</p>
+                <p style="margin: 0;">${titleAndDepartment}</p>
+                <p style="margin: 0; font-weight: bold;">${company}</p>
+                <p style="margin: 0;">${address}</p>
+                <p style="margin: 0;">${contactNumbers}</p>
+                <p style="margin: 0;">
+                    ${email ? `<a href="mailto:${email}" style="color: #0000EE; text-decoration: none;">${email}</a>` : ''}
+                    ${email && website ? ' | ' : ''}
+                    ${website ? `<a href="${website}" target="_blank" style="color: #0000EE; text-decoration: none;">${website}</a>` : ''}
+                </p>
+            </div>
         `;
+        
+        const plainTextSignature = [
+            name,
+            titleAndDepartment,
+            company,
+            address,
+            contactNumbers,
+            [email, website].filter(Boolean).join(' | ')
+        ].filter(Boolean).join('\n');
 
-        const blob = new Blob([signatureHtml], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'email_signature.html';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-        alert('서명이 email_signature.html 파일로 저장되었습니다!');
+        navigator.clipboard.write([
+            new ClipboardItem({
+                'text/html': new Blob([signatureHtml], { type: 'text/html' }),
+                'text/plain': new Blob([plainTextSignature], { type: 'text/plain' })
+            })
+        ]).then(() => {
+            alert('깔끔한 서명이 클립보드에 복사되었습니다!');
+        }).catch(err => {
+            console.error('서명 복사 실패: ', err);
+            alert('오류: 서명 복사에 실패했습니다.');
+        });
     }
 }
 
@@ -343,10 +323,7 @@ const updateCard = () => {
             businessCard.setAttribute('profile-pic', e.target.result);
         };
         reader.readAsDataURL(profilePicFile);
-    } else {
-        // Clear the profile pic if no file is selected
-        // businessCard.removeAttribute('profile-pic');
-    }
+    } 
 
     const companyLogoInput = document.getElementById('company-logo-input');
     const companyLogoFile = companyLogoInput.files[0];
@@ -356,9 +333,6 @@ const updateCard = () => {
             businessCard.setAttribute('company-logo', e.target.result);
         };
         reader.readAsDataURL(companyLogoFile);
-    } else {
-         // Clear the company logo if no file is selected
-        // businessCard.removeAttribute('company-logo');
     }
 };
 
@@ -366,8 +340,6 @@ form.addEventListener('input', updateCard);
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    // This part is mainly for show in this UI, the preview is updated live.
-    // But you could use this to add multiple cards to a list, for example.
     alert('명함 미리보기가 업데이트되었습니다.');
 });
 
@@ -379,7 +351,6 @@ document.querySelectorAll('.color-palette').forEach(palette => {
             const targetInput = document.getElementById(targetInputId);
             if (targetInput) {
                 targetInput.value = color;
-                // Create and dispatch an input event to trigger the update
                 targetInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
